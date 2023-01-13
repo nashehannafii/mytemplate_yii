@@ -1,3 +1,7 @@
+<?php
+
+use yii\bootstrap5\Html;
+?>
 <header class="header-desktop">
     <div class="section__content section__content--p30">
         <div class="container-fluid">
@@ -55,16 +59,16 @@
                         <div class="account-item clearfix js-item-menu">
 
                             <div class="content">
-                                <a class="js-acc-btn" href="#">Warung Nadiah - Depok</a>
+                                <a class="js-acc-btn" href="#"><?= Yii::$app->user->identity->nama ?></a>
                             </div>
                             <div class="account-dropdown js-dropdown">
                                 <div class="info clearfix">
 
                                     <div class="content">
                                         <h5 class="name">
-                                            <a href="#">john doe</a>
+                                            <a href="#"><?= Yii::$app->user->identity->nama ?></a>
                                         </h5>
-                                        <span class="email">johndoe@example.com</span>
+                                        <span class="email"><?= Yii::$app->user->identity->email ?></span>
                                     </div>
                                 </div>
                                 <div class="account-dropdown__body">
@@ -82,8 +86,7 @@
                                     </div>
                                 </div>
                                 <div class="account-dropdown__footer">
-                                    <a href="#">
-                                        <i class="zmdi zmdi-power"></i>Logout</a>
+                                    <?= Html::a('<i class="zmdi zmdi-power"></i>Logout', ['site/logout']) ?>
                                 </div>
                             </div>
                         </div>
