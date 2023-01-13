@@ -9,6 +9,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\User;
 
 class SiteController extends Controller
 {
@@ -17,7 +18,7 @@ class SiteController extends Controller
      */
     public function behaviors()
     {
-        
+
         return [
             'access' => [
                 'class' => AccessControl::class,
@@ -30,12 +31,12 @@ class SiteController extends Controller
                     ],
                 ],
             ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
+            // 'verbs' => [
+            //     'class' => VerbFilter::class,
+            //     'actions' => [
+            //         'logout' => ['post'],
+            //     ],
+            // ],
         ];
     }
 
@@ -62,7 +63,29 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect('site/login');
+        }
         return $this->render('index');
+    }
+
+    public function actionSignup()
+    {
+        $model = new User();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', "Data tersimpan");
+            return $this->redirect(['index']);
+        }
+
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionForgotPassword()
+    {
+        return $this->render('forgot_password');
     }
 
     /**
@@ -72,6 +95,7 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
+        $model = new User();
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
