@@ -63,6 +63,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        // echo '<pre>';print_r(Yii::$app->user->identity);die;
         if (Yii::$app->user->isGuest) {
             return $this->redirect('site/login');
         }
@@ -73,7 +74,10 @@ class SiteController extends Controller
     {
         $model = new User();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        
+        if ($model->load(Yii::$app->request->post())) {
+            echo '<pre>';print_r($model);die;
+            $model->save();
             Yii::$app->session->setFlash('success', "Data tersimpan");
             return $this->redirect(['index']);
         }

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\MyHelper;
+use app\models\AuthAssignment;
 use Yii;
 use app\models\User;
 use app\models\UserSearch;
@@ -21,30 +22,41 @@ class UserController extends Controller
      */
     public function behaviors()
     {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'denyCallback' => function ($rule, $action) {
-                    throw new \yii\web\ForbiddenHttpException('You are not allowed to access this page');
-                },
-                'only' => ['create','update','delete','index','view'],
-                'rules' => [
+        // return [
+        //     'access' => [
+        //         'class' => AccessControl::className(),
+        //         'denyCallback' => function ($rule, $action) {
+        //             throw new \yii\web\ForbiddenHttpException('You are not allowed to access this page');
+        //         },
+        //         // 'only' => ['create','update','delete','index','view'],
+        //         // 'rules' => [
                     
-                    [
-                        'actions' => ['create','update','delete','index','view'],
-                        'allow' => true,
-                        'roles' => ['theCreator']
-                    ]
-                ]
-            ],
+        //         //     [
+        //         //         'actions' => ['create','update','delete','index','view'],
+        //         //         'allow' => true,
+        //         //         'roles' => ['theCreator']
+        //         //     ]
+        //         // ]
+        //     ],
 
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
+        //     'verbs' => [
+        //         'class' => VerbFilter::className(),
+        //         'actions' => [
+        //             'delete' => ['POST'],
+        //         ],
+        //     ],
+        // ];
+        return array_merge(
+            parent::behaviors(),
+            [
+                'verbs' => [
+                    'class' => VerbFilter::className(),
+                    'actions' => [
+                        'delete' => ['POST'],
+                    ],
                 ],
-            ],
-        ];
+            ]
+        );
     }
 
 
@@ -81,63 +93,90 @@ class UserController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
+    // public function actionCreate()
+    // {
+    //     $user = new User(['scenario' => 'create']);
+        
+        
+    //     if (!$user->load(Yii::$app->request->post())) {
+    //         return $this->render('create', ['user' => $user]);
+    //     }
+        
+    //     $user->setPassword($user->password);
+    //     $user->generateAuthKey();
+    //     $user->status = '1';
+
+    //     $connection = \Yii::$app->db;
+    //     $transaction = $connection->beginTransaction();
+        
+    //     // echo '<pre>';print_r($user->access_role);die;
+    //     if ($user->validate()) {
+    //         try{
+
+
+    //             if($user->save()){
+    //                 $auth = Yii::$app->authManager;
+    //                 $role = $auth->getRole($user->access_role);
+    //                 $info = $auth->assign($role, $user->getId());
+
+    //                 if (!$info) 
+    //                     throw new \Exception('There was some error while saving user role.');
+                    
+    //                 Yii::$app->session->setFlash('success', 'Data successfully added');
+    //                 $transaction->commit();    
+    //             }
+
+    //             else{
+    //                 $errors = MyHelper::logError($user);
+    //                 Yii::$app->session->setFlash('error', Yii::t('app', $errors));
+    //             }
+                   
+    //         }
+
+    //         catch(\Exception $e) {
+    //             $transaction->rollBack();
+    //             $errors = $e->getMessage();
+
+
+    //             Yii::$app->session->setFlash('error', Yii::t('app', $errors));
+                
+    //         }
+
+            
+    //     }
+
+    //     else
+    //         return $this->render('create', ['user' => $user]);
+
+
+    //     return $this->redirect('index');
+    // }
+
     public function actionCreate()
     {
         $user = new User(['scenario' => 'create']);
-        
-        
+
         if (!$user->load(Yii::$app->request->post())) {
             return $this->render('create', ['user' => $user]);
         }
-        $pwd = $user->password;
+
         $user->setPassword($user->password);
         $user->generateAuthKey();
-        // $user->item_name = $user->access_role;
-        // $user->display_name = $user->first_name.' '.$user->last_name;
-
-
-        $connection = \Yii::$app->db;
-        $transaction = $connection->beginTransaction();
+        $user->item_name = $user->access_role;
+        if (!$user->save()) {
+            return $this->render('create', ['user' => $user]);
+        }
         
-        if ($user->validate()) {
-            try{
+        $auth = Yii::$app->authManager;
+        $role = $auth->getRole($user->item_name);
 
+        $info = $auth->assign($role, $user->getId());
 
-                if($user->save()){
-                    $auth = Yii::$app->authManager;
-                    $role = $auth->getRole($user->access_role);
-                    $info = $auth->assign($role, $user->getId());
-
-                    if (!$info) 
-                        throw new \Exception('There was some error while saving user role.');
-                    
-                    Yii::$app->session->setFlash('success', 'Data successfully added');
-                    $transaction->commit();    
-                }
-
-                else{
-                    $errors = MyHelper::logError($user);
-                    Yii::$app->session->setFlash('error', Yii::t('app', $errors));
-                }
-                   
-            }
-
-            catch(\Exception $e) {
-                $transaction->rollBack();
-                $errors = $e->getMessage();
-
-
-                Yii::$app->session->setFlash('error', Yii::t('app', $errors));
-                
-            }
-
-
-            
+        if (!$info) {
+            Yii::$app->session->setFlash('error', Yii::t('app', 'There was some error while saving user role.'));
         }
 
-        else
-            return $this->render('create', ['user' => $user]);
-
+       
 
         return $this->redirect('index');
     }
@@ -220,6 +259,7 @@ class UserController extends Controller
      */
     public function actionDelete($id)
     {
+        if (AuthAssignment::find()->where(['user_id'=>$id])->one()) $this->findModelAuth($id)->delete();        
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -235,6 +275,15 @@ class UserController extends Controller
     protected function findModel($id)
     {
         if (($model = User::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findModelAuth($id)
+    {
+        if (($model = AuthAssignment::find()->where(['user_id'=>$id])->one()) !== null) {
             return $model;
         }
 

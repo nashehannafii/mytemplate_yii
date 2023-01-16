@@ -17,32 +17,37 @@ use yii\bootstrap5\Html;
                         </a>
                     </div>
                     <div class="login-form">
-                        <form action="" method="post">
-                            <div class="form-group">
-                                <label>Username</label>
-                                <input class="au-input au-input--full" type="text" name="username" placeholder="Username">
-                            </div>
-                            <div class="form-group">
-                                <label>Email Address</label>
-                                <input class="au-input au-input--full" type="email" name="email" placeholder="Email">
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input class="au-input au-input--full" type="password" name="password" placeholder="Password">
-                            </div>
-                            <div class="login-checkbox">
-                                <label>
-                                    <input type="checkbox" name="aggree">Agree the terms and policy
-                                </label>
-                            </div>
-                            <button class="au-btn au-btn--block au-btn--green m-b-20" type="submit">register</button>
-                            <!-- <div class="social-login-content">
-                                <div class="social-button">
-                                    <button class="au-btn au-btn--block au-btn--blue m-b-20">register with facebook</button>
-                                    <button class="au-btn au-btn--block au-btn--blue2">register with twitter</button>
-                                </div>
-                            </div> -->
-                        </form>
+                        <?php $form = ActiveForm::begin([
+                            'options' => [
+                                'id' => 'form_validation',
+                            ]
+                        ]); ?>
+
+
+
+                        <div class="form-group">
+                            <?= $form->field($model, 'username', ['options' => ['tag' => false]])->textInput(['class' => 'au-input au-input--full', 'maxlength' => true, 'placeholder' => 'Username'])->label('Username') ?>
+                        </div>
+
+                        <div class="form-group">
+                            <?= $form->field($model, 'email', ['options' => ['tag' => false]])->textInput(['class' => 'au-input au-input--full', 'maxlength' => true, 'placeholder' => 'Email'])->label('Email Address') ?>
+                        </div>
+
+                        <div class="form-group">
+                            <?= $form->field($model, 'password', ['options' => ['tag' => false]])->passwordInput(['class' => 'au-input au-input--full', 'maxlength' => true, 'placeholder' => 'Enter new password again', 'onkeyup' => 'checkPassword()'])->label('Password') ?>
+                        </div>
+
+                        <code><p id="invalid"></p></code>
+
+                        <div class="form-group">
+                            <?= $form->field($model, 'otp', ['options' => ['tag' => false]])->passwordInput(['class' => 'au-input au-input--full', 'maxlength' => true, 'placeholder' => 'Enter your password again', 'onkeyup' => 'checkPassword()'])->label('Password Validation') ?>
+                        </div>
+                        
+
+                        <?= Html::submitButton('register', ['class' => 'au-btn au-btn--block au-btn--green m-b-20 btn btn-success btn-register', 'disabled'=>true]) ?>
+
+                        <?php ActiveForm::end(); ?>
+
                         <div class="register-link">
                             <p>
                                 Already have account?
@@ -56,3 +61,19 @@ use yii\bootstrap5\Html;
         </div>
     </div>
 </div>
+
+<script>
+
+function checkPassword() {
+
+    if ($('#user-otp').val() != null && $('#user-password').val() != null && $('#user-password').val() == $('#user-otp').val()) {
+        $(':button[type="submit"]').prop('disabled', false)
+        $('#invalid').text('')
+    }else{
+        $(':button[type="submit"]').prop('disabled', true)
+        $('#invalid').text('Invalid Password')
+    }
+}
+
+
+</script>
