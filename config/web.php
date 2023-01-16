@@ -7,11 +7,29 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'modules' => [
+        'gridview' =>  [
+            'class' => '\kartik\grid\Module'
+            // enter optional module parameters below - only if you need to  
+            // use your own export download action or custom translation 
+            // message source
+            // 'downloadAction' => 'gridview/export/download',
+            // 'i18n' => []
+        ],
+    ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+        'assetManager' => [
+            'bundles' => [
+                // we will use bootstrap css from our theme
+                'yii\bootstrap\BootstrapAsset' => [
+                    'css' => [], // do not use yii default one
+                ],
+            ],
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'm6idjWLASidom-kNrRYAOGkGQDm1A-5_',
@@ -19,19 +37,10 @@ $config = [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
-        'user' => [
-            'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
-        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        'mailer' => [
-            'class' => \yii\symfonymailer\Mailer::class,
-            'viewPath' => '@app/mail',
-            // send all mails to a file by default.
-            'useFileTransport' => true,
-        ],
+
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
@@ -41,12 +50,21 @@ $config = [
                 ],
             ],
         ],
+        'mailer' => [
+            'class' => \yii\symfonymailer\Mailer::class,
+            'viewPath' => '@app/mail',
+            // send all mails to a file by default.
+            'useFileTransport' => true,
+        ],
         'db' => $db,
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'rules' => [
-            ],
+            'rules' => [],
+        ],
+        'user' => [
+            'identityClass' => 'app\models\UserIdentity',
+            'enableAutoLogin' => true,
         ],
     ],
     'params' => $params,

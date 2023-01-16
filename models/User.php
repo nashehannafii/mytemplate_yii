@@ -1,4 +1,5 @@
 <?php
+
 namespace app\models;
 
 use app\rbac\models\Role;
@@ -21,7 +22,7 @@ class User extends UserIdentity
     // the list of status values that can be stored in user table
     const STATUS_ACTIVE   = '10';
     const STATUS_INACTIVE = '1';
-    const STATUS_DELETED  = 0;   
+    const STATUS_DELETED  = 0;
 
     /**
      * List of names for each status.
@@ -54,30 +55,33 @@ class User extends UserIdentity
         return [
             ['username', 'filter', 'filter' => 'trim'],
             ['username', 'string', 'min' => 2, 'max' => 255],
-            ['username', 'match',  'not' => true,
+            [
+                'username', 'match',  'not' => true,
                 // we do not want to allow users to pick one of spam/bad usernames 
-                'pattern' => '/\b('.Yii::$app->params['user.spamNames'].')\b/i',
-                'message' => Yii::t('app', 'It\'s impossible to have that username.')],          
-            ['username', 'unique', 
-                'message' => Yii::t('app', 'This username has already been taken.')],
+                'pattern' => '/\b(' . Yii::$app->params['user.spamNames'] . ')\b/i',
+                'message' => Yii::t('app', 'It\'s impossible to have that username.')
+            ],
+            [
+                'username', 'unique',
+                'message' => Yii::t('app', 'This username has already been taken.')
+            ],
 
             ['email', 'filter', 'filter' => 'trim'],
-            [['email','nama'], 'required'],
+            [['email', 'nama', 'password'], 'required'],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
-            ['unit_kerja_id', 'integer'],
-            ['email', 'unique', 'message' => Yii::t('app', 'This email address has already been taken.'),'on'=>'insert'],
+            ['email', 'unique', 'message' => Yii::t('app', 'This email address has already been taken.'), 'on' => 'insert'],
 
             // password field is required on 'create' scenario
             ['password', 'required', 'on' => 'create'],
             // use passwordStrengthRule() method to determine password strength
             $this->passwordStrengthRule(),
-            [['nama','username','uuid','is_accept_term','auditor_id'], 'safe'],
+            [['nama', 'username', 'uuid', 'is_accept_term'], 'safe'],
             ['status', 'required'],
             ['item_name', 'string', 'min' => 3, 'max' => 64],
             ['access_role', 'string', 'min' => 3, 'max' => 64],
-          
-            
+
+
         ];
     }
 
@@ -93,7 +97,7 @@ class User extends UserIdentity
 
         // password strength rule is determined by StrengthValidator 
         // presets are located in: vendor/kartik-v/yii2-password/presets.php
-        $strong = [['password'], StrengthValidator::className(), 'preset'=>'normal'];
+        $strong = [['password'], StrengthValidator::className(), 'preset' => 'normal'];
 
         // normal yii rule
         $normal = ['password', 'string', 'min' => 6];
@@ -104,14 +108,14 @@ class User extends UserIdentity
 
     public static function getListUsers()
     {
-        
-        $userPt = '';
-            
-        $where = [];    
-        
 
-        $list=User::find()->where($where)->all();
-        $listData=ArrayHelper::map($list,'id','username');
+        $userPt = '';
+
+        $where = [];
+
+
+        $list = User::find()->where($where)->all();
+        $listData = ArrayHelper::map($list, 'id', 'username');
         return $listData;
     }
 
@@ -141,7 +145,7 @@ class User extends UserIdentity
 
             'password' => Yii::t('app', 'Password'),
             'email' => Yii::t('app', 'Email'),
-            
+
             'status' => Yii::t('app', 'Status Aktif'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
@@ -164,13 +168,14 @@ class User extends UserIdentity
     }
 
 
-//------------------------------------------------------------------------------------------------//
-// USER FINDERS
-//------------------------------------------------------------------------------------------------//
-    public function getNamaLengkap(){
-        return !empty($this->dataDiri) ? $this->dataDiri->gelar_depan.' '.$this->dataDiri->nama.' '.$this->dataDiri->gelar_belakang : '';
+    //------------------------------------------------------------------------------------------------//
+    // USER FINDERS
+    //------------------------------------------------------------------------------------------------//
+    public function getNamaLengkap()
+    {
+        return !empty($this->dataDiri) ? $this->dataDiri->gelar_depan . ' ' . $this->dataDiri->nama . ' ' . $this->dataDiri->gelar_belakang : '';
     }
-    
+
     /**
      * Finds user by username.
      *
@@ -180,8 +185,8 @@ class User extends UserIdentity
     public static function findByUsername($username)
     {
         return static::findOne(['username' => $username]);
-    }  
-    
+    }
+
     /**
      * Finds user by email.
      *
@@ -191,7 +196,7 @@ class User extends UserIdentity
     public static function findByEmail($email)
     {
         return static::findOne(['email' => $email]);
-    } 
+    }
 
     /**
      * Finds user by password reset token.
@@ -225,9 +230,9 @@ class User extends UserIdentity
         ]);
     }
 
-//------------------------------------------------------------------------------------------------//
-// HELPERS
-//------------------------------------------------------------------------------------------------//
+    //------------------------------------------------------------------------------------------------//
+    // HELPERS
+    //------------------------------------------------------------------------------------------------//
 
     /**
      * Returns the user status in nice format.
@@ -253,7 +258,7 @@ class User extends UserIdentity
         if ($this->role) {
             return $this->role->item_name;
         }
-        
+
         // user does not have role assigned, but if he is authenticated '@'
         return '@authenticated';
     }
@@ -265,7 +270,7 @@ class User extends UserIdentity
     {
         $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
     }
-    
+
     /**
      * Removes password reset token.
      */
@@ -316,7 +321,4 @@ class User extends UserIdentity
     {
         $this->password_hash = Yii::$app->security->generatePasswordHash($password);
     }
-    
-
-    
 }

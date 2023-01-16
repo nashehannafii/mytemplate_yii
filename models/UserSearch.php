@@ -2,16 +2,15 @@
 
 namespace app\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\User;
+use app\models\user;
 use app\rbac\models\AuthItem;
 
 /**
- * UserSearch represents the model behind the search form of `app\models\User`.
+ * UserSearch represents the model behind the search form of `app\models\user`.
  */
-class UserSearch extends User
+class UserSearch extends user
 {
     /**
      * {@inheritdoc}
@@ -19,8 +18,8 @@ class UserSearch extends User
     public function rules()
     {
         return [
-            [['id', 'created_at', 'updated_at'], 'integer'],
-            [['username', 'uuid', 'nama', 'email', 'auth_key', 'password_hash', 'password_reset_token', 'otp', 'status', 'access_role'], 'safe'],
+            [['id'], 'integer'],
+            [['username', 'uuid', 'nama', 'email', 'auth_key', 'password_hash', 'password_reset_token', 'account_activation_token', 'otp', 'status', 'access_role', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -42,7 +41,7 @@ class UserSearch extends User
      */
     public function search($params)
     {
-        $query = User::find();
+        $query = user::find();
 
         // add conditions that should always apply here
 
@@ -72,12 +71,14 @@ class UserSearch extends User
             ->andFilterWhere(['like', 'auth_key', $this->auth_key])
             ->andFilterWhere(['like', 'password_hash', $this->password_hash])
             ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
+            ->andFilterWhere(['like', 'account_activation_token', $this->account_activation_token])
             ->andFilterWhere(['like', 'otp', $this->otp])
             ->andFilterWhere(['like', 'status', $this->status])
             ->andFilterWhere(['like', 'access_role', $this->access_role]);
 
         return $dataProvider;
     }
+
 
     public static function getRolesList()
     {
